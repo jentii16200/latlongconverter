@@ -25,8 +25,8 @@ class _HomePageState extends State<HomePage> {
 
   final List<Marker> markers = [];
   final PopupController popupController = PopupController();
-
-  latLng.LatLng currentLatLng = const latLng.LatLng(14.5535, 121.0452); // Default to West Rembo, Makati City
+  // ? Default to West Rembo, Makati City
+  latLng.LatLng currentLatLng = const latLng.LatLng(14.5535, 121.0452);
 
   @override
   void initState() {
@@ -79,7 +79,7 @@ class _HomePageState extends State<HomePage> {
       double lat = double.parse(latController.text);
       double lng = double.parse(longController.text);
 
-      var url = Uri.parse("http://your-backend-server/save-coords");
+      var url = Uri.parse("localhost:3000/save-coords");
       var response = await http.post(
         url,
         headers: {'Content-Type': 'application/json'},
@@ -169,19 +169,15 @@ class _HomePageState extends State<HomePage> {
                 ),
                 children: [
                   TileLayer(
-                    // Display map tiles from any source
-                    urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png', // OSMF's Tile Server
-                    userAgentPackageName: 'com.example.app',
-                    // And many more recommended properties!
+                    urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                    userAgentPackageName: 'com.example.latlongconverter',
                   ),
                   RichAttributionWidget(
-                    // Include a stylish prebuilt attribution widget that meets all requirments
                     attributions: [
                       TextSourceAttribution(
                         'OpenStreetMap contributors',
-                        onTap: () => launchUrl(Uri.parse('https://openstreetmap.org/copyright')), // (external)
+                        onTap: () => launchUrl(Uri.parse('https://openstreetmap.org/copyright')),
                       ),
-                      // Also add images...
                     ],
                   ),
                   MarkerLayer(

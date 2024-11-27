@@ -1,0 +1,18 @@
+[
+  {
+    "id": "1",
+    "lat": 14.5535,
+    "lng": 121.0452,
+    "notes": "West Rembo, Makati City - Default position",
+    "created_at": "2024-11-27T10:00:00Z",
+    "updated_at": "2024-11-27T10:00:00Z"
+  },
+  {
+    "id": "2",
+    "lat": 14.5995,
+    "lng": 120.9842,
+    "notes": "Manila - Capital city of the Philippines",
+    "created_at": "2024-11-26T12:30:00Z",
+    "updated_at": "2024-11-26T12:30:00Z"
+  },
+]
