@@ -1,23 +1,55 @@
-from pymongo import MongoClient, ASCENDING
+from flask import Flask, request, jsonify
+from flask_pymongo import PyMongo
 from datetime import datetime
 
-client = MongoClient('mongodb://localhost:27017/')
-db = client.test_coords
+app = Flask(__name__)
+
+app.config["MONGO_URI"] = "mongodb://localhost:27017/test_coords"
+mongo = PyMongo(app)
+
+coords_collection = mongo.db.coords_data
 
 
-collection = db.coords_data
-collection.create_index([("lat", ASCENDING)])
-collection.create_index([("lng", ASCENDING)])
+@app.route('/save-coords', methods=['POST'])
+def save_coords():
+    try:
+        data = request.get_json()
 
-# Example of adding a document
-example_doc = {
-    "id": 1,
-    "notes": "Sample Coordinate",
-    "lat": 14.5535,
-    "lng": 121.0452,
-    "created_at": datetime.now(),
-    "updated_at": datetime.now()
-}
-collection.insert_one(example_doc)
+     
+        lat = data.get('lat')
+        lng = data.get('lng')
+        notes = data.get('notes')
 
-print("Database and collection created successfully.")
+    
+        coords = {
+            'lat': lat,
+            'lng': lng,
+            'notes': notes,
+            'created_at': datetime.utcnow(),
+            'updated_at': datetime.utcnow()
+        }
+
+    
+        coords_collection.insert_one(coords)
+
+        return jsonify({"message": "Coordinates saved successfully!", "data": coords}), 201
+
+    except Exception as e:
+        return jsonify({"message": "Failed to save coordinates", "error": str(e)}), 500
+
+
+@app.route('/coords', methods=['GET'])
+def get_coords():
+    try:
+        coords_data = list(coords_collection.find())
+
+        for coord in coords_data:
+            coord['_id'] = str(coord['_id'])
+
+        return jsonify(coords_data), 200
+
+    except Exception as e:
+        return jsonify({"message": "Failed to fetch coordinates", "error": str(e)}), 500
+        
+if __name__ == '__main__':
+    app.run(debug=True, port=3000)

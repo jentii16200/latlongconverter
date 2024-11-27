@@ -1,5 +1,6 @@
 // ignore_for_file: use_build_context_synchronously
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -7,7 +8,7 @@ import 'package:flutter_map_marker_popup/flutter_map_marker_popup.dart';
 import 'package:http/http.dart' as http;
 // ignore: depend_on_referenced_packages
 import 'package:latlong2/latlong.dart' as latLng;
-import 'package:url_launcher/url_launcher.dart';
+// import 'package:url_launcher/url_launcher.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key, required this.title});
@@ -20,13 +21,14 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final TextEditingController latController = TextEditingController();
   final TextEditingController longController = TextEditingController();
+  final TextEditingController notesController = TextEditingController();
   String? convertedCoords;
   late MapController mapController;
 
   final List<Marker> markers = [];
   final PopupController popupController = PopupController();
-
-  latLng.LatLng currentLatLng = const latLng.LatLng(14.5535, 121.0452); // Default to West Rembo, Makati City
+  // ? Default to West Rembo, Makati City
+  latLng.LatLng currentLatLng = const latLng.LatLng(14.5535, 121.0452);
 
   @override
   void initState() {
@@ -75,22 +77,23 @@ class _HomePageState extends State<HomePage> {
   }
 
   void saveToDatabase() async {
+    log("running");
     try {
       double lat = double.parse(latController.text);
       double lng = double.parse(longController.text);
 
-      var url = Uri.parse("http://your-backend-server/save-coords");
+      var url = Uri.parse("http://192.168.1.2:3000/save-coords");
       var response = await http.post(
         url,
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           "lat": lat,
           "lng": lng,
-          "notes": "User inputted coordinates",
+          "notes": notesController.text,
         }),
       );
-
-      if (response.statusCode == 200) {
+      log(response.statusCode.toString());
+      if (response.statusCode == 201) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Coordinates saved successfully!")),
         );
@@ -100,6 +103,7 @@ class _HomePageState extends State<HomePage> {
         );
       }
     } catch (e) {
+      log(e.toString());
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Invalid input.")),
       );
@@ -119,13 +123,18 @@ class _HomePageState extends State<HomePage> {
           children: [
             TextField(
               controller: latController,
-              decoration: const InputDecoration(labelText: 'Latitude (DD)'),
+              decoration: const InputDecoration(labelText: 'Latitude (DDss)'),
               keyboardType: TextInputType.number,
             ),
             TextField(
               controller: longController,
               decoration: const InputDecoration(labelText: 'Longitude (DD)'),
               keyboardType: TextInputType.number,
+            ),
+            TextField(
+              controller: notesController,
+              decoration: const InputDecoration(labelText: 'Notes'),
+              keyboardType: TextInputType.text,
             ),
             const SizedBox(height: 16),
             ElevatedButton(
@@ -169,19 +178,15 @@ class _HomePageState extends State<HomePage> {
                 ),
                 children: [
                   TileLayer(
-                    // Display map tiles from any source
-                    urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png', // OSMF's Tile Server
-                    userAgentPackageName: 'com.example.app',
-                    // And many more recommended properties!
+                    urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                    userAgentPackageName: 'com.example.latlongconverter',
                   ),
                   RichAttributionWidget(
-                    // Include a stylish prebuilt attribution widget that meets all requirments
                     attributions: [
                       TextSourceAttribution(
                         'OpenStreetMap contributors',
-                        onTap: () => launchUrl(Uri.parse('https://openstreetmap.org/copyright')), // (external)
+                        onTap: () => 'https://openstreetmap.org/copyright',
                       ),
-                      // Also add images...
                     ],
                   ),
                   MarkerLayer(
